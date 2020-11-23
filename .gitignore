@@ -1,2 +1,3 @@
 graphql/.env
 api.sqlite
+__pycache__
