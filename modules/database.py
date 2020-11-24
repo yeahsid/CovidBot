@@ -6,17 +6,18 @@ import pylibmc
 import sys
 from dotenv import load_dotenv
 import os
-import ast
 # API Caching to prevent rate limits . Cache Valid for 4 hours
 requests_cache.install_cache(cache_name="api", expire_after=14440)
 
-# API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
+
 load_dotenv()
 HOST = os.getenv("DBHOST")
 PORT = os.getenv("DBPORT")
 USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
+
+# API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
 
 
 def api_call():
@@ -199,73 +200,6 @@ def update_db():
         print("Cannot close DB Connection", sys.exc_info()[1])
 
 
-def get_stats(Country):
-
-    try:
-        client = pylibmc.Client(['127.0.0.1'], time=14440)
-        data = client.get('country_stats')
-        print("Using Memcached")
-        if data is None:
-            try:
-
-                covid19db = mysql.connector.connect(
-                    host=HOST,
-                    port=PORT,
-                    user=USER,
-                    passwd=PASSWD,
-                    database=DATABASE
-                )
-                cursor = covid19db.cursor(dictionary=True)
-                sql = "SELECT * from country_stats WHERE Country = %s"
-                val = (Country, )
-                cursor.execute(sql, val)
-                result = cursor.fetchone()
-                print("Usind DB call with Memcached")
-                client.set('country_stats', result)
-                return result
-            except:
-                data = api_call()
-                for i in range(0, len(data["Countries"])):
-                    Country_API = data["Countries"][i]["Country"]
-                    if Country_API == Country:
-                        try:
-                            result = data["Countries"][i]
-                            client.set('country_stats', result)
-                            return result
-                        except:
-                            print("Country not found")
-        dict_str = data.decode("UTF-8")
-        data_final = ast.literal_eval(dict_str)
-        return data_final
-
-    except:
-        print("Memcached is down , executing Database call directly call directly")
-        covid19db = mysql.connector.connect(
-            host=HOST,
-            port=PORT,
-            user=USER,
-            passwd=PASSWD,
-            database=DATABASE
-        )
-        cursor = covid19db.cursor(dictionary=True)
-        sql = "SELECT * from country_stats WHERE Country = %s"
-        val = (Country, )
-        cursor.execute(sql, val)
-        data = cursor.fetchone()
-        return data
 
 
-'''
-    except:
-        print("Memcached and database are down . Using API directly")
-        data1 = api_call()
-        for i in range(0, len(data["Countries"])):
-            Country_API = data["Countries"][i]["Country"]
-            if Country_API == Country:
-                try:
-                    data = data1["Countries"][i]
-                except:
-                    print("Country not found")
-'''
-test = get_stats("India")
-print(test)
+

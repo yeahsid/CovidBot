@@ -2,7 +2,7 @@ from ariadne import ObjectType, QueryType, gql, make_executable_schema
 from ariadne.asgi import GraphQL
 import sys
 sys.path.append('modules/')
-import functions 
+import database 
 
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
