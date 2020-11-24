@@ -2,4 +2,5 @@ api.sqlite
 modules/.env
 graphql/*
 __pycache__
+.vscode
 
