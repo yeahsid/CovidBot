@@ -6,4 +6,6 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
-  - uvicorn server:app
+  - python server.py
+  - python modules/fetch.py
+  - python modules/database.py
