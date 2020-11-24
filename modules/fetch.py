@@ -1,9 +1,9 @@
-from database import api_call
 import mysql.connector
 import pylibmc
 from dotenv import load_dotenv
 import os
 import sys
+import requests
 sys.path.append('modules/')
 
 load_dotenv()
@@ -12,14 +12,31 @@ PORT = os.getenv("DBPORT")
 USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
+MEMPORT = os.getenv("MEMPORT")
+client = pylibmc.Client([MEMPORT])
 
 
-def get_country_stats(Country):
+def apiCall():
+    try:
+
+        url = "https://api.covid19api.com/summary"
+        headers = {}
+        payload = {}
+
+        covid19StatsData = requests.request(
+            "GET", url, headers=headers, data=payload)
+        #print("Using Cache for API call: ", covid19_stats_data.from_cache)
+        return covid19StatsData.json()
+    except:
+        #print("An error occured in fetching data from the API. Are you being rate limited?")
+        raise ConnectionError("Fetch failed. Check URL")
+
+
+def getCountryStats(country):
 
     try:
-        client = pylibmc.Client(['127.0.0.1'])
-        data = client.get(Country)
-        print("Using Memcached")
+
+        data = client.get(country.replace(" ", ""))
         if data is None:
             try:
 
@@ -32,38 +49,35 @@ def get_country_stats(Country):
                 )
                 cursor = covid19db.cursor(dictionary=True)
                 try:
-                    sql = "SELECT * from country_stats WHERE Country = %s"
-                    val = (Country, )
+                    sql = "SELECT * from countryStats WHERE country = %s"
+                    val = (country, )
                     cursor.execute(sql, val)
                     result = cursor.fetchone()
                     print("Using DB call with Memcached")
                     if result is None:
-                        print("Country not found")
+                        return result
                     else:
-                        client.set(Country, result)
+                        client.set(country.replace(" ", ""), result, time=14440)
                         return result
                 except:
-                    print("Could not execute the SQL Statement")
+                    raise Exception("Could not execute the SQL Statement")
             except:
                 try:
-                    print("Using API call with Memcached")
-                    data = api_call()
+
+                    data = apiCall()
                     for i in range(0, len(data["Countries"])):
-                        Country_API = data["Countries"][i]["Country"]
-                        if Country_API == Country:
+                        countryAPI = data["Countries"][i]["Country"]
+                        if countryAPI == country:
 
                             result = data["Countries"][i]
-                            client.set(Country, result)
+                            client.set(country, result, time=14440)
                             return result
-                        else:
-                            print("Country not found")
                 except:
-                    print("API call failed")
+                    raise Exception("API call failed")
         return data
 
-    except Exception:
+    except:
         try:
-            print("Memcached is down , executing Database call directly ")
             covid19db = mysql.connector.connect(
                 host=HOST,
                 port=PORT,
@@ -73,37 +87,34 @@ def get_country_stats(Country):
             )
             try:
                 cursor = covid19db.cursor(dictionary=True)
-                sql = "SELECT * from country_stats WHERE Country = %s"
-                val = (Country, )
+                sql = "SELECT * from countryStats WHERE country = %s"
+                val = (country, )
                 cursor.execute(sql, val)
                 data = cursor.fetchone()
                 if data is None:
-                    print("Country not found")
+                    print("country not found")
                 else:
                     return data
             except:
-                print("SQL Execution failed", sys.exc_info()[1])
+                raise Exception("SQL Execution failed")
         except:
             try:
                 print("Memcached and database are down . Using API directly")
-                data1 = api_call()
+                data1 = apiCall()
                 for i in range(0, len(data1["Countries"])):
-                    Country_API = data1["Countries"][i]["Country"]
-                    if Country_API == Country:
+                    countryAPI = data1["Countries"][i]["Country"]
+                    if countryAPI == country:
 
                         data = data1["Countries"][i]
                         return data
 
             except:
-                print("All methods to fetch data have failed",
-                      sys.exc_info()[1])
+                raise Exception("All methods to fetch data have failed")
 
 
-def get_stats():
+def getStats():
 
     try:
-        print("Using Memcached")
-        client = pylibmc.Client(['127.0.0.1'])
         data = client.get('Global')
         if data is None:
             try:
@@ -117,27 +128,26 @@ def get_stats():
                 )
                 cursor = covid19db.cursor(dictionary=True)
                 try:
-                    sql = "SELECT * from global_stats "
+                    sql = "SELECT * from globalStats "
                     cursor.execute(sql)
                     result = cursor.fetchone()
                     print("Using DB call with Memcached")
-                    client.set("Global", result)
+                    client.set("Global", result, time=14440)
                     return result
                 except:
-                    print("Could not execute the SQL Statement")
+                    raise Exception("Could not execute the SQL Statement")
             except:
                 try:
-                    print("Using API call with Memcached")
-                    data = api_call()
+                    data = apiCall()
+                    client.set("Global", result, time=14440)
                     return data
                 except:
-                    print("API call failed")
+                    raise Exception("API call failed")
 
         return data
 
     except Exception:
         try:
-            print("Memcached is down , executing Database call directly ",)
             covid19db = mysql.connector.connect(
                 host=HOST,
                 port=PORT,
@@ -147,21 +157,19 @@ def get_stats():
             )
             try:
                 cursor = covid19db.cursor(dictionary=True)
-                sql = "SELECT * from global_stats"
+                sql = "SELECT * from globalStats"
                 cursor.execute(sql)
                 data = cursor.fetchone()
                 return data
             except:
-                print("SQL Execution failed", sys.exc_info()[1])
+                raise Exception("SQL Execution failed")
         except:
             try:
-                print("Memcached and database are down . Using API directly")
-                data = api_call()
+                data = apiCall()
                 return data
 
             except:
-                print("All methods to fetch data have failed",
-                      sys.exc_info()[1])
+                raise Exception("All methods to fetch data have failed")
 
 
-print(get_stats())
+

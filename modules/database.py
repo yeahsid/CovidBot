@@ -6,6 +6,9 @@ import pylibmc
 import sys
 from dotenv import load_dotenv
 import os
+from fetch import apiCall
+#import modules.fetch
+
 # API Caching to prevent rate limits . Cache Valid for 4 hours
 requests_cache.install_cache(cache_name="api", expire_after=14440)
 
@@ -16,28 +19,16 @@ PORT = os.getenv("DBPORT")
 USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
+MEMPORT = os.getenv("MEMPORT")
+client = pylibmc.Client(MEMPORT)
 
 # API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
 
 
-def api_call():
-    try:
-
-        url = "https://api.covid19api.com/summary"
-        headers = {}
-        payload = {}
-
-        covid19_stats_data = requests.request(
-            "GET", url, headers=headers, data=payload)
-        print("Using Cache for API call: ", covid19_stats_data.from_cache)
-        return covid19_stats_data.json()
-    except:
-        print(
-            "An error occured in fetching data from the API. Are you being rate limited?")
 #
 
 
-def insert_db():
+def insertDb():
 
     try:
         covid19db = mysql.connector.connect(
@@ -50,79 +41,76 @@ def insert_db():
         )
 
     except:
-        print("Connection to database failed")
+        raise ConnectionError("Connection to database failed")
 
     try:
-        data = api_call()
+        data = apiCall()
     except:
-        print("Could not insert data. Check memcached")
-    try:
-        cursor = covid19db.cursor()
-        sql = 'create table country_stats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, Country varchar(30) UNIQUE NOT NULL, CountryCode varchar(5) UNIQUE NOT NULL , Slug varchar(30) UNIQUE NOT NULL, NewConfirmed int  NOT NULL, TotalConfirmed int  NOT NULL, NewDeaths int, TotalDeaths int  NOT NULL, NewRecovered int , TotalRecovered int NOT NULL, Date varchar(30))'
-        cursor.execute(sql)
-        covid19db.commit()
-        print("Table country_stats Created")
-
-    except:
-        print("Could not create country_stats Table")
+        raise ConnectionError("Fetch failed. Check URL. [insertdb]")
     try:
         cursor = covid19db.cursor()
-        sql = 'create table global_stats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, NewConfirmed int  NOT NULL, TotalConfirmed int  NOT NULL, NewDeaths int, TotalDeaths int  NOT NULL, NewRecovered int , TotalRecovered int NOT NULL)'
+        sql = 'create table countryStats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, country varchar(30) UNIQUE NOT NULL, countryCode varchar(5) UNIQUE NOT NULL , slug varchar(30) UNIQUE NOT NULL, dailyNewConfirmed int  NOT NULL, totalConfirmed int  NOT NULL, dailyNewDeaths int, totalDeaths int  NOT NULL, dailyNewRecovered int , totalRecovered int NOT NULL, date varchar(30))'
         cursor.execute(sql)
         covid19db.commit()
-        print("Table global_stats Created")
 
     except:
-        print("Could not create global_stats Table")
+        raise Exception("Cannot create table countryStats")
+    try:
+        cursor = covid19db.cursor()
+        sql = 'create table globalStats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, dailyNewConfirmed int  NOT NULL, totalConfirmed int  NOT NULL, dailyNewDeaths int, totalDeaths int  NOT NULL, dailyNewRecovered int , totalRecovered int NOT NULL)'
+        cursor.execute(sql)
+        covid19db.commit()
+
+    except:
+        raise Exception("Could not create globalStats Table")
     for i in range(0, len(data["Countries"])):
-        Country = data["Countries"][i]["Country"]
-        CountryCode = data["Countries"][i]["CountryCode"]
-        Slug = data["Countries"][i]["Slug"]
-        NewConfirmed = data["Countries"][i]["NewConfirmed"]
-        TotalConfirmed = data["Countries"][i]["TotalConfirmed"]
-        NewDeaths = data["Countries"][i]["NewDeaths"]
-        TotalDeaths = data["Countries"][i]["TotalDeaths"]
-        NewRecovered = data["Countries"][i]["NewRecovered"]
-        TotalRecovered = data["Countries"][i]["TotalRecovered"]
-        Date = data["Countries"][i]["Date"]
+        country = data["Countries"][i]["Country"]
+        countryCode = data["Countries"][i]["CountryCode"]
+        slug = data["Countries"][i]["Slug"]
+        dailyNewConfirmed = data["Countries"][i]["NewConfirmed"]
+        totalConfirmed = data["Countries"][i]["TotalConfirmed"]
+        dailyNewDeaths = data["Countries"][i]["NewDeaths"]
+        totalDeaths = data["Countries"][i]["TotalDeaths"]
+        dailyNewRecovered = data["Countries"][i]["NewRecovered"]
+        totalRecovered = data["Countries"][i]["TotalRecovered"]
+        date = data["Countries"][i]["Date"]
         cursor = covid19db.cursor()
         try:
 
-            sql = 'INSERT INTO country_stats (Country, CountryCode, Slug , NewConfirmed , TotalConfirmed , NewDeaths , TotalDeaths , NewRecovered , TotalRecovered , Date) VALUES (%s, %s , %s ,%s, %s , %s ,%s, %s , %s ,%s)'
-            val = (Country, CountryCode, Slug, NewConfirmed, TotalConfirmed,
-                   NewDeaths, TotalDeaths, NewRecovered, TotalRecovered, Date)
+            sql = 'INSERT INTO countryStats (country, countryCode, slug , dailyNewConfirmed , totalConfirmed , dailyNewDeaths , totalDeaths , dailyNewRecovered , totalRecovered , date) VALUES (%s, %s , %s ,%s, %s , %s ,%s, %s , %s ,%s)'
+            val = (country, countryCode, slug, dailyNewConfirmed, totalConfirmed,
+                   dailyNewDeaths, totalDeaths, dailyNewRecovered, totalRecovered, date)
             cursor.execute(sql, val)
             covid19db.commit()
 
         except:
-            print("SQL Error")
+            raise Exception("Could not insert data into countryStats table")
 
-    NewConfirmedGlobal = data["Global"]["NewConfirmed"]
-    TotalConfirmedGlobal = data["Global"]["TotalConfirmed"]
-    NewDeathsGlobal = data["Global"]["NewDeaths"]
-    TotalDeathsGlobal = data["Global"]["TotalDeaths"]
-    NewRecoveredGlobal = data["Global"]["NewRecovered"]
-    TotalRecoveredGlobal = data["Global"]["TotalRecovered"]
+    dailyNewConfirmedGlobal = data["Global"]["NewConfirmed"]
+    totalConfirmedGlobal = data["Global"]["TotalConfirmed"]
+    dailyNewDeathsGlobal = data["Global"]["NewDeaths"]
+    totalDeathsGlobal = data["Global"]["TotalDeaths"]
+    dailyNewRecoveredGlobal = data["Global"]["NewRecovered"]
+    totalRecoveredGlobal = data["Global"]["TotalRecovered"]
     cursor = covid19db.cursor()
     try:
 
-        sql = 'INSERT INTO global_stats (NewConfirmed , TotalConfirmed , NewDeaths , TotalDeaths , NewRecovered , TotalRecovered ) VALUES (%s, %s , %s ,%s, %s , %s )'
-        val = (NewConfirmedGlobal, TotalConfirmedGlobal,
-               NewDeathsGlobal, TotalDeathsGlobal, NewRecoveredGlobal, TotalRecoveredGlobal)
+        sql = 'INSERT INTO globalStats (dailyNewConfirmed , totalConfirmed , dailyNewDeaths , totalDeaths , dailyNewRecovered , totalRecovered ) VALUES (%s, %s , %s ,%s, %s , %s )'
+        val = (dailyNewConfirmedGlobal, totalConfirmedGlobal,
+               dailyNewDeathsGlobal, totalDeathsGlobal, dailyNewRecoveredGlobal, totalRecoveredGlobal)
         cursor.execute(sql, val)
         covid19db.commit()
 
     except:
-        print("Could not insert into global_stats", sys.exc_info()[1])
+        raise Exception("Could not insert data  into  globalStats Table")
     try:
         cursor.close()
-        print("Connection closed successfully")
     except:
-        print("Cannot close DB Connection", sys.exc_info()[1])
+        raise ConnectionError("Cannot close DB Connection")
 
 
-def update_db():
-    data = api_call()
+def updateDb():
+    data = apiCall()
 
     try:
         covid19db = mysql.connector.connect(
@@ -134,72 +122,67 @@ def update_db():
         )
 
     except:
-        print("Connection to database failed", sys.exc_info()[1])
+        raise ConnectionError("Connection to database failed")
     try:
         cursor = covid19db.cursor()
-        sql = 'TRUNCATE TABLE country_stats'
+        sql = 'TRUNCATE TABLE countryStats'
         cursor.execute(sql)
         covid19db.commit()
-        print("country_stats Table deleted , inserting data")
     except:
-        print("Table couldnt be deleted", sys.exc_info()[1])
+        raise Exception("Table countryStats couldnt be truncated")
     try:
         cursor = covid19db.cursor()
-        sql = 'TRUNCATE TABLE global_stats'
+        sql = 'TRUNCATE TABLE globalStats'
         cursor.execute(sql)
         covid19db.commit()
-        print("global_stats Table deleted , inserting data")
     except:
-        print("Table couldnt be deleted", sys.exc_info()[1])
+        raise Exception("Table globalStats couldnt be truncated")
 
     for i in range(0, len(data["Countries"])):
 
-        Country = data["Countries"][i]["Country"]
-        CountryCode = data["Countries"][i]["CountryCode"]
-        Slug = data["Countries"][i]["Slug"]
-        NewConfirmed = data["Countries"][i]["NewConfirmed"]
-        TotalConfirmed = data["Countries"][i]["TotalConfirmed"]
-        NewDeaths = data["Countries"][i]["NewDeaths"]
-        TotalDeaths = data["Countries"][i]["TotalDeaths"]
-        NewRecovered = data["Countries"][i]["NewRecovered"]
-        TotalRecovered = data["Countries"][i]["TotalRecovered"]
-        Date = data["Countries"][i]["Date"]
+        country = data["Countries"][i]["Country"]
+        countryCode = data["Countries"][i]["CountryCode"]
+        slug = data["Countries"][i]["slug"]
+        dailyNewConfirmed = data["Countries"][i]["NewConfirmed"]
+        totalConfirmed = data["Countries"][i]["TotalConfirmed"]
+        dailyNewDeaths = data["Countries"][i]["NewDeaths"]
+        totalDeaths = data["Countries"][i]["TotalDeaths"]
+        dailyNewRecovered = data["Countries"][i]["NewRecovered"]
+        totalRecovered = data["Countries"][i]["TotalRecovered"]
+        date = data["Countries"][i]["Date"]
 
         try:
 
-            sql = 'INSERT INTO country_stats (Country, CountryCode, Slug , NewConfirmed , TotalConfirmed , NewDeaths , TotalDeaths , NewRecovered , TotalRecovered , Date) VALUES (%s, %s , %s ,%s, %s , %s ,%s, %s , %s ,%s)'
-            val = (Country, CountryCode, Slug, NewConfirmed, TotalConfirmed,
-                   NewDeaths, TotalDeaths, NewRecovered, TotalRecovered, Date)
+            sql = 'INSERT INTO countryStats (country, countryCode, slug , dailyNewConfirmed , totalConfirmed , dailyNewDeaths , totalDeaths , dailyNewRecovered , totalRecovered , date) VALUES (%s, %s , %s ,%s, %s , %s ,%s, %s , %s ,%s)'
+            val = (country, countryCode, slug, dailyNewConfirmed, totalConfirmed,
+                   dailyNewDeaths, totalDeaths, dailyNewRecovered, totalRecovered, date)
             cursor.execute(sql, val)
             covid19db.commit()
 
         except:
-            print("Could not insert country_stats", sys.exc_info()[1])
+            raise Exception("Could not update data in countryStats")
 
-    NewConfirmedGlobal = data["Global"]["NewConfirmed"]
-    TotalConfirmedGlobal = data["Global"]["TotalConfirmed"]
-    NewDeathsGlobal = data["Global"]["NewDeaths"]
-    TotalDeathsGlobal = data["Global"]["TotalDeaths"]
-    NewRecoveredGlobal = data["Global"]["NewRecovered"]
-    TotalRecoveredGlobal = data["Global"]["TotalRecovered"]
+    dailyNewConfirmedGlobal = data["Global"]["NewConfirmed"]
+    totalConfirmedGlobal = data["Global"]["TotalConfirmed"]
+    dailyNewDeathsGlobal = data["Global"]["NewDeaths"]
+    totalDeathsGlobal = data["Global"]["TotalDeaths"]
+    dailyNewRecoveredGlobal = data["Global"]["NewRecovered"]
+    totalRecoveredGlobal = data["Global"]["TotalRecovered"]
     cursor = covid19db.cursor()
     try:
 
-        sql = 'INSERT INTO global_stats (NewConfirmed , TotalConfirmed , NewDeaths , TotalDeaths , NewRecovered , TotalRecovered ) VALUES (%s, %s , %s ,%s, %s , %s )'
-        val = (NewConfirmedGlobal, TotalConfirmedGlobal,
-               NewDeathsGlobal, TotalDeathsGlobal, NewRecoveredGlobal, TotalRecoveredGlobal)
+        sql = 'INSERT INTO globalStats (dailyNewConfirmed , totalConfirmed , dailyNewDeaths , totalDeaths , dailyNewRecovered , totalRecovered ) VALUES (%s, %s , %s ,%s, %s , %s )'
+        val = (dailyNewConfirmedGlobal, totalConfirmedGlobal,
+               dailyNewDeathsGlobal, totalDeathsGlobal, dailyNewRecoveredGlobal, totalRecoveredGlobal)
         cursor.execute(sql, val)
         covid19db.commit()
 
     except:
-        print("Could not insert global_stats values", sys.exc_info()[1])
+        raise Exception("Could not insert globalStats values")
     try:
         cursor.close()
         print("Connection closed successfully")
     except:
-        print("Cannot close DB Connection", sys.exc_info()[1])
+        raise ConnectionError("Cannot close DB Connection")
 
-
-
-
-
+insertDb()
