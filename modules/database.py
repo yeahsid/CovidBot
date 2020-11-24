@@ -184,5 +184,3 @@ def updateDb():
         print("Connection closed successfully")
     except:
         raise ConnectionError("Cannot close DB Connection")
-
-insertDb()
