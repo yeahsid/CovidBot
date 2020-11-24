@@ -59,4 +59,4 @@ def resolveGlobalStats(*_):
 schema = make_executable_schema(type_defs, query)
 
 # Create an ASGI app using the schema, running in debug mode
-app = GraphQL(schema)
+app = GraphQL(schema, introspection=False)

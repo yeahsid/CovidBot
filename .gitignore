@@ -1,3 +1,5 @@
-graphql/.env
 api.sqlite
+modules/.env
+graphql/*
 __pycache__
+
