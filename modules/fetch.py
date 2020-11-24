@@ -1,9 +1,10 @@
 import mysql.connector
-import pylibmc
+from pymemcache.client import base
 from dotenv import load_dotenv
 import os
 import sys
 import requests
+import ast
 sys.path.append('modules/')
 
 load_dotenv()
@@ -13,7 +14,7 @@ USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
 MEMPORT = os.getenv("MEMPORT")
-client = pylibmc.Client([MEMPORT])
+client = base.Client(MEMPORT)
 
 
 def apiCall():
@@ -57,7 +58,8 @@ def getCountryStats(country):
                     if result is None:
                         return result
                     else:
-                        client.set(country.replace(" ", ""), result, time=14440)
+                        client.set(country.replace(" ", ""),
+                                   result, expire=14440)
                         return result
                 except:
                     raise Exception("Could not execute the SQL Statement")
@@ -70,11 +72,13 @@ def getCountryStats(country):
                         if countryAPI == country:
 
                             result = data["Countries"][i]
-                            client.set(country, result, time=14440)
+                            client.set(country, result,  expire=14440)
                             return result
                 except:
                     raise Exception("API call failed")
-        return data
+        tempData = data.decode("UTF-8")
+        mydata = ast.literal_eval(tempData)
+        return mydata
 
     except:
         try:
@@ -132,19 +136,21 @@ def getStats():
                     cursor.execute(sql)
                     result = cursor.fetchone()
                     print("Using DB call with Memcached")
-                    client.set("Global", result, time=14440)
+                    client.set("Global", result, expire=14440)
                     return result
                 except:
                     raise Exception("Could not execute the SQL Statement")
             except:
                 try:
                     data = apiCall()
-                    client.set("Global", result, time=14440)
+                    client.set("Global", result, expire=14440)
                     return data
                 except:
                     raise Exception("API call failed")
 
-        return data
+        tempData = data.decode("UTF-8")
+        mydata = ast.literal_eval(tempData)
+        return mydata
 
     except Exception:
         try:
@@ -170,6 +176,3 @@ def getStats():
 
             except:
                 raise Exception("All methods to fetch data have failed")
-
-
-

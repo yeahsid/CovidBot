@@ -2,7 +2,6 @@ import requests
 import json
 import mysql.connector
 import requests_cache
-import pylibmc
 import sys
 from dotenv import load_dotenv
 import os
@@ -20,7 +19,7 @@ USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
 MEMPORT = os.getenv("MEMPORT")
-client = pylibmc.Client(MEMPORT)
+
 
 # API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
 
