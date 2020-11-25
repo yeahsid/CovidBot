@@ -141,7 +141,7 @@ def updateDb():
 
         country = data["Countries"][i]["Country"]
         countryCode = data["Countries"][i]["CountryCode"]
-        slug = data["Countries"][i]["slug"]
+        slug = data["Countries"][i]["Slug"]
         dailyNewConfirmed = data["Countries"][i]["NewConfirmed"]
         totalConfirmed = data["Countries"][i]["TotalConfirmed"]
         dailyNewDeaths = data["Countries"][i]["NewDeaths"]

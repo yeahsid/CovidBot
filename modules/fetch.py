@@ -33,11 +33,11 @@ def apiCall():
         raise ConnectionError("Fetch failed. Check URL")
 
 
-def getCountryStats(country):
+def getCountryStats(slug):
 
     try:
 
-        data = client.get(country.replace(" ", ""))
+        data = client.get(slug)
         if data is None:
             try:
 
@@ -50,15 +50,15 @@ def getCountryStats(country):
                 )
                 cursor = covid19db.cursor(dictionary=True)
                 try:
-                    sql = "SELECT * from countryStats WHERE country = %s"
-                    val = (country, )
+                    sql = "SELECT * from countryStats WHERE slug = %s"
+                    val = (slug, )
                     cursor.execute(sql, val)
                     result = cursor.fetchone()
                     print("Using DB call with Memcached")
                     if result is None:
                         return result
                     else:
-                        client.set(country.replace(" ", ""),
+                        client.set(slug,
                                    result, expire=14440)
                         return result
                 except:
@@ -68,11 +68,11 @@ def getCountryStats(country):
 
                     data = apiCall()
                     for i in range(0, len(data["Countries"])):
-                        countryAPI = data["Countries"][i]["Country"]
-                        if countryAPI == country:
+                        countryAPI = data["Countries"][i]["Slug"]
+                        if countryAPI == slug:
 
                             result = data["Countries"][i]
-                            client.set(country, result,  expire=14440)
+                            client.set(slug, result,  expire=14440)
                             return result
                 except:
                     raise Exception("API call failed")
@@ -91,8 +91,8 @@ def getCountryStats(country):
             )
             try:
                 cursor = covid19db.cursor(dictionary=True)
-                sql = "SELECT * from countryStats WHERE country = %s"
-                val = (country, )
+                sql = "SELECT * from countryStats WHERE slug = %s"
+                val = (slug, )
                 cursor.execute(sql, val)
                 data = cursor.fetchone()
                 if data is None:
@@ -106,8 +106,8 @@ def getCountryStats(country):
                 print("Memcached and database are down . Using API directly")
                 data1 = apiCall()
                 for i in range(0, len(data1["Countries"])):
-                    countryAPI = data1["Countries"][i]["Country"]
-                    if countryAPI == country:
+                    countryAPI = data1["Countries"][i]["Slug"]
+                    if countryAPI == slug:
 
                         data = data1["Countries"][i]
                         return data

@@ -8,7 +8,7 @@ from modules.fetch import apiCall
 # Wrapping string in gql function provides validation and better error traceback
 type_defs = gql("""
     type Query {
-        countryStats(country: String!): countryStats
+        countryStats(slug: String!): countryStats
         globalStats: globalStats
     }
 
@@ -42,9 +42,9 @@ query = QueryType()
 
 
 @query.field("countryStats")
-def resolveCountryStats(*_, country):
+def resolveCountryStats(*_, slug):
 
-    call = getCountryStats(country)
+    call = getCountryStats(slug)
     return call
 
 
@@ -59,4 +59,4 @@ def resolveGlobalStats(*_):
 schema = make_executable_schema(type_defs, query)
 
 # Create an ASGI app using the schema, running in debug mode
-app = GraphQL(schema, introspection=False)
+app = GraphQL(schema, introspection=True)
