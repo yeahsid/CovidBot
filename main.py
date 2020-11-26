@@ -1,4 +1,4 @@
-from fetch import getStats, getCountryStats, apiCall
+from functions import getStats, getCountryStats, apiCall
 from ariadne.asgi import GraphQL
 from ariadne import ObjectType, QueryType, gql, make_executable_schema
 
@@ -59,4 +59,4 @@ def resolveGlobalStats(*_):
 schema = make_executable_schema(type_defs, query)
 
 # Create an ASGI app using the schema, running in debug mode
-app = GraphQL(schema, introspection=True)
+app = GraphQL(schema, debug=True, introspection=True)
