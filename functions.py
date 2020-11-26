@@ -26,9 +26,6 @@ client = base.Client(MEMPORT)
 # API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
 
 
-#
-
-
 def insertDb():
 
     try:

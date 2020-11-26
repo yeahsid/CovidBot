@@ -7,5 +7,5 @@ install:
 # command to run tests
 script:
   - python main.py
-  - python fetch.py
-  - python database.py
+  - python functions.py
+  
