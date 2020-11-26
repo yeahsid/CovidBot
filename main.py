@@ -1,9 +1,9 @@
-from modules.fetch import getStats, getCountryStats
+from fetch import getStats, getCountryStats, apiCall
 from ariadne.asgi import GraphQL
 from ariadne import ObjectType, QueryType, gql, make_executable_schema
-from modules.fetch import apiCall
 
-
+# gunicorn -w 3 -k uvicorn.workers.UvicornWorker main:app -b 0.0.0.0:8000
+# pkill gunicorn
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
 type_defs = gql("""
