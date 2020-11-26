@@ -1,5 +1,5 @@
 api.sqlite
-modules/.env
+.env
 __pycache__
 .vscode/
 
