@@ -28,7 +28,7 @@ def begin_prompt():
         {
             'type': 'confirm',
             'name': 'start',
-            'message': 'Welcome to Covid19 chatbot. This app is only to maintain the backend systems. The chatbot is implemented on IBM Watson. Do you want to continue? :'
+            'message': 'Welcome to Covid19 chatbot. This app is only to maintain the backend systems. The chatbot is implemented on IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
 
         }
 
