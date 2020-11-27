@@ -18,8 +18,8 @@ def clear():
 
 
 clear()
-f = Figlet(font='slant')
-print(Fore.CYAN + f.renderText('Covid19 Chatbot') + Style.RESET_ALL)
+f = Figlet(font='slant', width=100)
+print(Fore.CYAN + f.renderText('Covid19 Chatbot CLI') + Style.RESET_ALL)
 
 
 def begin_prompt():
@@ -28,7 +28,7 @@ def begin_prompt():
         {
             'type': 'confirm',
             'name': 'start',
-            'message': 'Welcome to Covid19 chatbot. This app is only to maintain the backend systems. The chatbot is implemented on IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
+            'message': 'Welcome to the Covid19 chatbot. This app is only for maintaining the backend systems. The chatbot NLP is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
 
         }
 
@@ -65,11 +65,11 @@ def choiceForExec():
             execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '.format(
                 backend)
             print(
-                Fore.GREEN + "App run successfully. Go to https://covid19-graphql.itsezsid.com/ or 0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
+                Fore.GREEN + "App is running successfully. Go to https://covid19-graphql.itsezsid.com/ or 0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
             subprocess.getstatusoutput(execution)
 
         except KeyboardInterrupt:
-            print(Fore.RED + "Stopping Gunicorn , App may not close. Use the menu to close the app" + Style.RESET_ALL)
+            print(Fore.RED + "Stopping Gunicorn , App may not close. Use the CLI to close the app" + Style.RESET_ALL)
 
         except:
             print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000'" +
