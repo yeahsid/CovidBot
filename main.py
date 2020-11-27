@@ -6,8 +6,10 @@ from colorama import Fore, Back, Style
 import subprocess
 import os
 import json
-path = os.path.abspath(os.getcwd())
-backend = path + '/backend'
+path = os.getcwd()
+tempath = os.getcwd().split('/')
+if tempath[-1] == 'COVID-19':
+    backend = (path + '/backend')
 
 
 def clear():
@@ -28,7 +30,7 @@ def begin_prompt():
         {
             'type': 'confirm',
             'name': 'start',
-            'message': 'Welcome to the Covid19 chatbot. This app is only for maintaining the backend systems. The chatbot NLP is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
+            'message': 'Welcome to the Covid19 chatbot CLI. This app is only for maintaining the backend systems. The chatbot NLP is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
 
         }
 
@@ -157,10 +159,14 @@ def main():
         print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
 
 
-try:
-    main()
-except:
-    if KeyboardInterrupt:
-        print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
-    else:
-        print(Fore.RED + "Error" + Style.RESET_ALL)
+if tempath[-1] == 'COVID19-API':
+    try:
+        main()
+    except:
+        if KeyboardInterrupt:
+            print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "Error" + Style.RESET_ALL)
+else:
+    print(Fore.RED + "Please run this code in the COVID19-API directory." + Style.RESET_ALL)
+
