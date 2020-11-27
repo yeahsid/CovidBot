@@ -1,5 +1,6 @@
 api.sqlite
-.env
+backend/.env
 __pycache__
 .vscode/
+cache/
 

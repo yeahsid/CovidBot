@@ -10,7 +10,7 @@ from pymemcache.client import base
 #import modules.fetch
 
 # API Caching to prevent rate limits . Cache Valid for 4 hours
-requests_cache.install_cache(cache_name="api", expire_after=14440)
+requests_cache.install_cache(cache_name="cache/api", expire_after=14440)
 
 
 load_dotenv()
@@ -47,7 +47,7 @@ def insertDb():
         raise ConnectionError("Fetch failed. Check URL. [insertdb]")
     try:
         cursor = covid19db.cursor()
-        sql = 'create table countryStats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, country varchar(30) UNIQUE NOT NULL, countryCode varchar(5) UNIQUE NOT NULL , slug varchar(30) UNIQUE NOT NULL, dailyNewConfirmed int  NOT NULL, totalConfirmed int  NOT NULL, dailyNewDeaths int, totalDeaths int  NOT NULL, dailyNewRecovered int , totalRecovered int NOT NULL, date varchar(30))'
+        sql = 'create table countryStats(ID int NOT NULL AUTO_INCREMENT PRIMARY KEY, country varchar(50) UNIQUE NOT NULL, countryCode varchar(5) UNIQUE NOT NULL , slug varchar(50) UNIQUE NOT NULL, dailyNewConfirmed int  NOT NULL, totalConfirmed int  NOT NULL, dailyNewDeaths int, totalDeaths int  NOT NULL, dailyNewRecovered int , totalRecovered int NOT NULL, date varchar(30))'
         cursor.execute(sql)
         covid19db.commit()
 

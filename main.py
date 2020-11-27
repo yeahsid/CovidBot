@@ -1,62 +1,166 @@
-from functions import getStats, getCountryStats, apiCall
-from ariadne.asgi import GraphQL
-from ariadne import ObjectType, QueryType, gql, make_executable_schema
-
-# gunicorn -w 3 -k uvicorn.workers.UvicornWorker main:app -b 0.0.0.0:8000
-# pkill gunicorn
-# Define types using Schema Definition Language (https://graphql.org/learn/schema/)
-# Wrapping string in gql function provides validation and better error traceback
-type_defs = gql("""
-    type Query {
-        countryStats(slug: String!): countryStats
-        globalStats: globalStats
-    }
-
-    type countryStats {
-        country: String
-        countryCode: String
-        slug: String
-        dailyNewConfirmed: Int
-        totalConfirmed: Int
-        dailyNewDeaths: Int
-        dailyNewRecovered: Int
-        totalDeaths: Int
-        totalRecovered: Int
-        dateUpdatedDate: String
-    }
-
-    type globalStats {
-        dailyNewConfirmed: Int
-        totalConfirmed: Int
-        dailyNewDeaths: Int
-        dailyNewRecovered: Int
-        totalDeaths: Int
-        totalRecovered: Int
-    }
+from __future__ import print_function, unicode_literals
+from pyfiglet import Figlet
+from PyInquirer import prompt, print_json
+import backend.functions as functions
+from colorama import Fore, Back, Style
+import subprocess
+import os
+import json
+path = os.path.abspath(os.getcwd())
+backend = path + '/backend'
 
 
-""")
-
-# Map resolver functions to Query fields using QueryType
-query = QueryType()
-
-
-@query.field("countryStats")
-def resolveCountryStats(*_, slug):
-
-    call = getCountryStats(slug)
-    return call
+def clear():
+    if os.name == 'nt':
+        _ = os.system('cls')
+    else:
+        _ = os.system('clear')
 
 
-@query.field("globalStats")
-def resolveGlobalStats(*_):
-
-    call = getStats()
-    return call
+clear()
+f = Figlet(font='slant')
+print(Fore.CYAN + f.renderText('Covid19 Chatbot') + Style.RESET_ALL)
 
 
-# Create executable GraphQL schema
-schema = make_executable_schema(type_defs, query)
+def begin_prompt():
+    questions = [
 
-# Create an ASGI app using the schema, running in debug mode
-app = GraphQL(schema, debug=True, introspection=True)
+        {
+            'type': 'confirm',
+            'name': 'start',
+            'message': 'Welcome to Covid19 chatbot. This app is only to maintain the backend systems. The chatbot is implemented on IBM Watson. Do you want to continue? :'
+
+        }
+
+    ]
+
+    answers = prompt(questions)
+    return answers
+
+
+def choiceForExec():
+    questions = [
+
+        {
+            'type': 'list',
+            'name': 'choiceForExec',
+            'message': 'What would you like to do? ',
+            'choices': ["Install Dependencies", 'Run the GraphQL APP', 'Stop the GraphQL app', 'Update the Database', 'Create SQL Tables in a new Database', "Check API Call", "Get Stats"]
+
+        }
+
+    ]
+
+    answers = prompt(questions)
+    if answers["choiceForExec"] == "Install Dependencies":
+        try:
+            command = 'pip3 install requirements.txt'
+            subprocess.getstatusoutput(command)
+            print(Fore.GREEN + 'Dependencies installed successfully')
+        except:
+            print(
+                Fore.RED + 'Could not install dependencies. Install requirements.txt manually')
+    elif answers["choiceForExec"] == 'Run the GraphQL APP':
+        try:
+            execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '.format(
+                backend)
+            print(
+                Fore.GREEN + "App run successfully. Go to https://api.itsezsid.com or 0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
+            subprocess.getstatusoutput(execution)
+
+        except KeyboardInterrupt:
+            print(Fore.RED + "Stopping Gunicorn" + Style.RESET_ALL)
+
+        except:
+            print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000'" +
+                  + Style.RESET_ALL)
+
+    elif answers["choiceForExec"] == 'Stop the GraphQL app':
+        try:
+            execution = 'cd {} && pkill gunicorn'.format(backend)
+            subprocess.getstatusoutput(execution)
+            print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
+
+        except:
+            print(Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
+                  + Style.RESET_ALL)
+    elif answers["choiceForExec"] == 'Update the Database':
+        try:
+            functions.updateDb()
+            print(Fore.GREEN + "Database Updated Successfully" + Style.RESET_ALL)
+        except:
+            print(Fore.RED + "Database couldnt be updated . Check .env file")
+    elif answers["choiceForExec"] == 'Check API Call':
+        try:
+            data = functions.apiCall()
+            print(json.dumps(data, indent=2))
+            print(Fore.GREEN + "Command ran successfully")
+        except:
+            print(Fore.RED + "Command Failed" + Style.RESET_ALL)
+    elif answers["choiceForExec"] == 'Get Stats':
+        try:
+            stats_prompt()
+        except:
+            print(Fore.RED + 'Could not get stats' + Style.RESET_ALL)
+
+
+def countryStatsInput():
+    questions = [
+
+        {
+            'type': 'input',
+            'name': 'country',
+            'message': 'Please enter the country name [Countries like United States of America have the indentifier as united-states] : ',
+
+        }
+
+    ]
+
+    answers = prompt(questions)
+    return answers
+
+
+def stats_prompt():
+    questions = [
+
+        {
+            'type': 'list',
+            'name': 'Statistics',
+            'message': 'Do you want world stats or country stats?',
+            'choices': ['World Statistics', 'Country Statistics'],
+
+        }
+
+    ]
+
+    answers = prompt(questions)
+    if answers["Statistics"] == "World Statistics":
+
+        data = functions.getStats()
+
+        print(json.dumps(data, indent=2))
+        # print(data)
+
+    else:
+        slug = countryStatsInput()
+        data = functions.getCountryStats(slug["country"])
+        print(json.dumps(data, indent=2))
+
+
+def main():
+
+    choice = begin_prompt()
+    if choice['start'] == True:
+        choiceForExec()
+
+    else:
+        print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
+
+
+try:
+    main()
+except:
+    if KeyboardInterrupt:
+        print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
+    else:
+        print(Fore.RED + "Error" + Style.RESET_ALL)

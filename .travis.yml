@@ -6,6 +6,7 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 script:
+  - python backend/graphql-backend.py
+  - python backend/functions.py
   - python main.py
-  - python functions.py
   
