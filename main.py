@@ -69,7 +69,7 @@ def choiceForExec():
             subprocess.getstatusoutput(execution)
 
         except KeyboardInterrupt:
-            print(Fore.RED + "Stopping Gunicorn" + Style.RESET_ALL)
+            print(Fore.RED + "Stopping Gunicorn , App may not close. Use the menu to close the app" + Style.RESET_ALL)
 
         except:
             print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000'" +
