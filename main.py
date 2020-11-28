@@ -8,7 +8,7 @@ import os
 import json
 path = os.getcwd()
 tempath = os.getcwd().split('/')
-if tempath[-1] == 'COVID-19':
+if tempath[-1] == 'MedBot':
     backend = (path + '/backend')
 
 
@@ -21,7 +21,7 @@ def clear():
 
 clear()
 f = Figlet(font='slant', width=100)
-print(Fore.CYAN + f.renderText('Covid19 Chatbot CLI') + Style.RESET_ALL)
+print(Fore.CYAN + f.renderText('MedBot CLI') + Style.RESET_ALL)
 
 
 def begin_prompt():
@@ -30,7 +30,7 @@ def begin_prompt():
         {
             'type': 'confirm',
             'name': 'start',
-            'message': 'Welcome to the Covid19 chatbot CLI. This app is only for maintaining the backend systems. The chatbot NLP is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
+            'message': 'Welcome to MedBot CLI. This app is only for maintaining the backend systems. The chatbot is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
 
         }
 
@@ -56,7 +56,7 @@ def choiceForExec():
     answers = prompt(questions)
     if answers["choiceForExec"] == "Install Dependencies":
         try:
-            command = 'pip3 install requirements.txt'
+            command = 'pipenv install'
             subprocess.getstatusoutput(command)
             print(Fore.GREEN + 'Dependencies installed successfully')
         except:
@@ -159,7 +159,7 @@ def main():
         print(Fore.YELLOW + "Designed by Siddharth and Varun" + Style.RESET_ALL)
 
 
-if tempath[-1] == 'COVID19-API':
+if tempath[-1] == 'MedBot':
     try:
         main()
     except:
@@ -168,5 +168,4 @@ if tempath[-1] == 'COVID19-API':
         else:
             print(Fore.RED + "Error" + Style.RESET_ALL)
 else:
-    print(Fore.RED + "Please run this code in the COVID19-API directory." + Style.RESET_ALL)
-
+    print(Fore.RED + "Please run this code in the MedBot directory." + Style.RESET_ALL)

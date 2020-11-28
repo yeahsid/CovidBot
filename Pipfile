@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+ariadne = "*"
+mysql-connector-python = "*"
+requests = "*"
+requests-cache = "*"
+pyfiglet = "*"
+pyinquirer = "*"
+pymemcache = "*"
+colorama = "*"
+python-dotenv = "*"
+gunicorn = "*"
+uvicorn = "*"
+uvloop = "*"
+httptools = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
