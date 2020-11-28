@@ -21,7 +21,7 @@ def clear():
 
 clear()
 f = Figlet(font='slant', width=100)
-print(Fore.CYAN + f.renderText('CovidBot CLI') + Style.RESET_ALL)
+print(Fore.CYAN + Style.BRIGHT + f.renderText('CovidBot CLI') + Style.RESET_ALL)
 
 
 def begin_prompt():
@@ -168,4 +168,4 @@ if tempath[-1] == 'CovidBot':
         else:
             print(Fore.RED + "Error" + Style.RESET_ALL)
 else:
-    print(Fore.RED + "Please run this code in the CovidBot directory." + Style.RESET_ALL)
+    print(Fore.RED + "Please run the CLI in the CovidBot directory." + Style.RESET_ALL)
