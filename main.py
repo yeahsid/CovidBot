@@ -21,7 +21,7 @@ def clear():
 
 clear()
 f = Figlet(font='slant', width=100)
-print(Fore.CYAN + Style.BRIGHT + f.renderText('CovidBot CLI') + Style.RESET_ALL)
+print(Fore.MAGENTA + Style.BRIGHT + f.renderText('CovidBot CLI') + Style.RESET_ALL)
 
 
 def begin_prompt():

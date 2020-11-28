@@ -1,2 +1,2 @@
-from backend.functions import updateDb , insertDb
-insertDb()
+from functions import updateDb, insertDb
+updateDb()
