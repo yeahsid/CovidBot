@@ -1,6 +1,11 @@
 from functions import getStats, getCountryStats
+from ariadne import QueryType, make_executable_schema
 from ariadne.asgi import GraphQL
-from ariadne import ObjectType, QueryType, gql, make_executable_schema
+from ariadne import gql
+from starlette.applications import Starlette
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+
 
 # gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000
 # pkill gunicorn
@@ -58,5 +63,9 @@ def resolveGlobalStats(*_):
 # Create executable GraphQL schema
 schema = make_executable_schema(type_defs, query)
 
+middleware = [
+    Middleware(CORSMiddleware, allow_origins=['*'] , allow_methods = ['POST']  )
+]
 # Create an ASGI app using the schema
-app = GraphQL(schema, debug=False, introspection=False)
+app = Starlette(debug=True , middleware = middleware)
+app.mount("/", GraphQL(schema, debug=True , introspection = True))

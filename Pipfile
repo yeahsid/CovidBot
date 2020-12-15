@@ -17,6 +17,7 @@ gunicorn = "*"
 uvicorn = "*"
 uvloop = "*"
 httptools = "*"
+starlette = "*"
 
 [dev-packages]
 

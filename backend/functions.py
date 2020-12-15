@@ -12,7 +12,7 @@ from pymemcache.client import base
 # API Caching to prevent rate limits . Cache Valid for 4 hours
 requests_cache.install_cache(cache_name="cache/api", expire_after=14440)
 
-
+# Loads env variables
 load_dotenv()
 HOST = os.getenv("DBHOST")
 PORT = os.getenv("DBPORT")
@@ -23,11 +23,8 @@ MEMPORT = os.getenv("MEMPORT")
 client = base.Client(MEMPORT)
 
 
-# API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
-
-
 def insertDb():
-
+    # Creates SQL tables and inserts data into it. Use this when program is being run for the first time and database is not created
     try:
         covid19db = mysql.connector.connect(
             host=HOST,
@@ -109,7 +106,7 @@ def insertDb():
 
 def updateDb():
     data = apiCall()
-
+    # Updates the database when new data is retrieved from API call. Run updatedb.py as a cron job to update everyday
     try:
         covid19db = mysql.connector.connect(
             host=HOST,
@@ -185,6 +182,7 @@ def updateDb():
 
 
 def apiCall():
+    # API call function . Makes a POST request to https://covid19api.com summary endpoint. This is the source of data
     try:
 
         url = "https://api.covid19api.com/summary"
@@ -284,7 +282,7 @@ def getCountryStats(slug):
 
 
 def getStats():
-
+    # Retrieves stats . this is the main code
     try:
         data = client.get('Global')
         if data is None:
