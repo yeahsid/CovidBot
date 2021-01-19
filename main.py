@@ -6,12 +6,14 @@ from colorama import Fore, Back, Style
 import subprocess
 import os
 import json
+
 path = os.getcwd()
 tempath = os.getcwd().split('/')
 
 # Checks if CLI is running in the correct directory
 if tempath[-1] == 'CovidBot':
     backend = (path + '/backend')
+
 
 # Clears terminal
 
@@ -28,6 +30,7 @@ clear()
 f = Figlet(font='slant', width=100)
 print(Fore.MAGENTA + Style.BRIGHT +
       f.renderText('CovidBot CLI') + Style.RESET_ALL)
+
 
 # Menu 1 [Intro]
 
@@ -47,6 +50,7 @@ def begin_prompt():
     answers = prompt(questions)
     return answers
 
+
 # Menu 2 [Main menu]
 
 
@@ -57,7 +61,8 @@ def choiceForExec():
             'type': 'list',
             'name': 'choiceForExec',
             'message': 'What would you like to do? ',
-            'choices': ["Install Dependencies", 'Run the GraphQL APP', 'Stop the GraphQL app', 'Update the Database', 'Create SQL Tables in a new Database', "Check API Call", "Get Stats"]
+            'choices': ["Install Dependencies", 'Run the GraphQL APP', 'Stop the GraphQL app', 'Update the Database',
+                        'Create SQL Tables in a new Database', "Check API Call", "Get Stats"]
 
         }
 
@@ -77,14 +82,19 @@ def choiceForExec():
             execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '.format(
                 backend)
             print(
-                Fore.GREEN + "App is running successfully. Go to https://covidbot.itsezsid.com/graphql or 0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
+                Fore.GREEN + "App is running successfully. Go to https://covidbot.itsezsid.com/graphql or "
+                             "0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
             subprocess.getstatusoutput(execution)
 
         except KeyboardInterrupt:
             print(Fore.RED + "Stopping Gunicorn , App may not close. Use the CLI to close the app" + Style.RESET_ALL)
 
         except:  # Except block if cli cant run gunicorn
-            print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000'" +
+            print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory "
+                                                                                 "and run 'gunicorn -w 3 -k "
+                                                                                 "uvicorn.workers.UvicornWorker "
+                                                                                 "graphql-backend:app -b "
+                                                                                 "0.0.0.0:8000'" +
                   + Style.RESET_ALL)
 
     elif answers["choiceForExec"] == 'Stop the GraphQL app':
@@ -94,8 +104,9 @@ def choiceForExec():
             print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
 
         except:  # Except block
-            print(Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
-                  + Style.RESET_ALL)
+            print(
+                Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
+                + Style.RESET_ALL)
     elif answers["choiceForExec"] == 'Update the Database':
         try:  # Runs the update function
             functions.updateDb()
@@ -115,6 +126,7 @@ def choiceForExec():
         except:
             print(Fore.RED + 'Could not get stats' + Style.RESET_ALL)
 
+
 # Menu to take country name
 
 
@@ -132,6 +144,7 @@ def countryStatsInput():
 
     answers = prompt(questions)
     return answers
+
 
 # Menu for stats
 
@@ -162,11 +175,11 @@ def stats_prompt():
         data = functions.getCountryStats(slug["country"])
         print(json.dumps(data, indent=2))
 
+
 # Driver code
 
 
 def main():
-
     choice = begin_prompt()
     if choice['start'] == True:
         choiceForExec()
