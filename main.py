@@ -82,7 +82,7 @@ def choiceForExec():
             execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '.format(
                 backend)
             print(
-                Fore.GREEN + "App is running successfully. Go to https://covidbot.itsezsid.com/graphql or "
+                Fore.GREEN + "App is running successfully. Go to https://graphql.itsezsid.com or "
                              "0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
             subprocess.getstatusoutput(execution)
 
