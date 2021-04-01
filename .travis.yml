@@ -8,4 +8,5 @@ install:
 script:
   - python backend/graphql-backend.py
   - python backend/functions.py
-  
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
