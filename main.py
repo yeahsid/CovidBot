@@ -87,7 +87,15 @@ def choiceForExec():
             subprocess.getstatusoutput(execution)
 
         except KeyboardInterrupt:
-            print(Fore.RED + "Stopping Gunicorn , App may not close. Use the CLI to close the app" + Style.RESET_ALL)
+            try:  # Stops gunicorn using pkill [Kills Process]
+                execution = 'cd {} && pkill gunicorn'.format(backend)
+                subprocess.getstatusoutput(execution)
+                print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
+
+            except:  # Except block
+                print(
+                    Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
+                    + Style.RESET_ALL)
 
         except:  # Except block if cli cant run gunicorn
             print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory "

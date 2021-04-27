@@ -19,8 +19,7 @@ PORT = os.getenv("DBPORT")
 USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
-MEMPORT = os.getenv("MEMPORT")
-client = base.Client(MEMPORT)
+client = base.Client(('localhost',11211))
 
 
 def insertDb():
