@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 import os
 import ast
 from pymemcache.client import base
-#import modules.fetch
+from sentry_sdk import capture_exception
+import sentry_sdk
+
 
 # API Caching to prevent rate limits . Cache Valid for 4 hours
 requests_cache.install_cache(cache_name="cache/api", expire_after=14440)
@@ -19,7 +21,18 @@ PORT = os.getenv("DBPORT")
 USER = os.getenv("DBUSER")
 PASSWD = os.getenv("DBPASSWD")
 DATABASE = os.getenv("DBDATABASE")
-client = base.Client(('localhost',11211))
+client = base.Client(('localhost', 11211))
+SENTRY = os.getenv("SENTRYURL")
+
+sentry_sdk.init(
+    SENTRY,
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0
+)
+
 
 
 def insertDb():
@@ -225,9 +238,11 @@ def getCountryStats(slug):
                         client.set(slug,
                                    result, expire=14440)
                         return result
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     raise Exception("Could not execute the SQL Statement")
-            except:
+            except Exception as e:
+                capture_exception(e)
                 try:
 
                     data = apiCall()
@@ -238,13 +253,15 @@ def getCountryStats(slug):
                             result = data["Countries"][i]
                             client.set(slug, result,  expire=14440)
                             return result
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     raise Exception("API call failed")
         tempData = data.decode("UTF-8")
         mydata = ast.literal_eval(tempData)
         return mydata
 
-    except:
+    except Exception as e:
+        capture_exception(e)
         try:
             covid19db = mysql.connector.connect(
                 host=HOST,
@@ -263,9 +280,11 @@ def getCountryStats(slug):
                     print("country not found")
                 else:
                     return data
-            except:
+            except Exception as e:
+                capture_exception(e)
                 raise Exception("SQL Execution failed")
-        except:
+        except Exception as e:
+            capture_exception(e)
             try:
                 print("Memcached and database are down . Using API directly")
                 data1 = apiCall()
@@ -276,7 +295,8 @@ def getCountryStats(slug):
                         data = data1["Countries"][i]
                         return data
 
-            except:
+            except Exception as e:
+                capture_exception(e)
                 raise Exception("All methods to fetch data have failed")
 
 
@@ -302,21 +322,25 @@ def getStats():
                     print("Using DB call with Memcached")
                     client.set("Global", result, expire=14440)
                     return result
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     raise Exception("Could not execute the SQL Statement")
-            except:
+            except Exception as e:
+                capture_exception(e)
                 try:
                     data = apiCall()
                     client.set("Global", result, expire=14440)
                     return data
-                except:
+                except Exception as e:
+                    capture_exception(e)
                     raise Exception("API call failed")
 
         tempData = data.decode("UTF-8")
         mydata = ast.literal_eval(tempData)
         return mydata
 
-    except Exception:
+    except Exception as e:
+        capture_exception(e)
         try:
             covid19db = mysql.connector.connect(
                 host=HOST,
@@ -331,12 +355,15 @@ def getStats():
                 cursor.execute(sql)
                 data = cursor.fetchone()
                 return data
-            except:
+            except Exception as e:
+                capture_exception(e)
                 raise Exception("SQL Execution failed")
-        except:
+        except Exception as e:
+            capture_exception(e)
             try:
                 data = apiCall()
                 return data
 
-            except:
+            except Exception as e:
+                capture_exception(e)
                 raise Exception("All methods to fetch data have failed")

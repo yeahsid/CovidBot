@@ -18,6 +18,7 @@ uvicorn = "*"
 uvloop = "*"
 httptools = "*"
 starlette = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 

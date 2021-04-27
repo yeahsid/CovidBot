@@ -3,9 +3,22 @@ from pyfiglet import Figlet
 from PyInquirer import prompt, print_json
 import backend.functions as functions
 from colorama import Fore, Back, Style
+from dotenv import load_dotenv
 import subprocess
 import os
 import json
+import sentry_sdk
+from sentry_sdk import capture_exception
+SENTRY = os.getenv("SENTRYURL")
+sentry_sdk.init(
+    SENTRY,
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0
+)
+
 
 path = os.getcwd()
 tempath = os.getcwd().split('/')
@@ -74,7 +87,8 @@ def choiceForExec():
             command = 'pipenv install'
             subprocess.getstatusoutput(command)
             print(Fore.GREEN + 'Dependencies installed successfully')
-        except:
+        except Exception as e:
+            capture_exception(e)
             print(
                 Fore.RED + 'Could not install dependencies. Install pipenv manually')
     elif answers["choiceForExec"] == 'Run the GraphQL APP':
@@ -92,7 +106,8 @@ def choiceForExec():
                 subprocess.getstatusoutput(execution)
                 print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
 
-            except:  # Except block
+            except Exception as e:  # Except block
+                capture_exception(e)
                 print(
                     Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
                     + Style.RESET_ALL)
@@ -111,7 +126,8 @@ def choiceForExec():
             subprocess.getstatusoutput(execution)
             print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
 
-        except:  # Except block
+        except Exception as e:  # Except block
+            capture_exception(e)
             print(
                 Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
                 + Style.RESET_ALL)
@@ -119,19 +135,22 @@ def choiceForExec():
         try:  # Runs the update function
             functions.updateDb()
             print(Fore.GREEN + "Database Updated Successfully" + Style.RESET_ALL)
-        except:
+        except Exception as e:
+            capture_exception(e)
             print(Fore.RED + "Database couldnt be updated . Check .env file")
     elif answers["choiceForExec"] == 'Check API Call':
         try:  # Makes the API call for testing
             data = functions.apiCall()
             print(json.dumps(data, indent=2))
             print(Fore.GREEN + "Command ran successfully")
-        except:
+        except Exception as e:
+            capture_exception(e)
             print(Fore.RED + "Command Failed" + Style.RESET_ALL)
     elif answers["choiceForExec"] == 'Get Stats':
         try:  # Runs the stats_promp() function to
             stats_prompt()
-        except:
+        except Exception as e:
+            capture_exception(e)
             print(Fore.RED + 'Could not get stats' + Style.RESET_ALL)
 
 
