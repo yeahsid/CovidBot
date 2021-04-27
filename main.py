@@ -83,7 +83,7 @@ def choiceForExec():
                 backend)
             print(
                 Fore.GREEN + "App is running successfully. Go to https://graphql.itsezsid.com or "
-                             "0.0.0.0:8080 to access the GraphQL endpoint" + Style.RESET_ALL)
+                             "0.0.0.0:8000 to access the GraphQL endpoint" + Style.RESET_ALL)
             subprocess.getstatusoutput(execution)
 
         except KeyboardInterrupt:
