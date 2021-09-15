@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      - MYSQL_DATABASE=covidbot
+      - MYSQL_ROOT_PASSWORD=${MYSQLPASSWORD}
+    ports:
+      - '3306:3306'
+  
+  memcached:
+    image: docker.io/bitnami/memcached:1
+    ports:
+      - '11211:11211'
+  covidbot_app:
+    environment:
+      - PORT=8000
+      - MYSQLHOST=localhost
+      - MYSQLPORT=3306
+      - MYSQLUSER=mysql
+      - MYSQLPASSWORD=${MYSQLPASSWORD}
+      - MYSQLDATABASE=covidbot
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+
