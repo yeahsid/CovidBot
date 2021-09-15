@@ -16,11 +16,11 @@ requests_cache.install_cache(cache_name="cache/api", expire_after=14440)
 
 # Loads env variables
 load_dotenv()
-HOST = os.getenv("DBHOST")
-PORT = os.getenv("DBPORT")
-USER = os.getenv("DBUSER")
-PASSWD = os.getenv("DBPASSWD")
-DATABASE = os.getenv("DBDATABASE")
+HOST = os.getenv("MYSQLHOST")
+PORT = os.getenv("MYSQLPORT")
+USER = os.getenv("MYSQLUSER")
+PASSWD = os.getenv("MYSQLPASSWORD")
+DATABASE = os.getenv("MYSQLDATABASE")
 client = base.Client(('localhost', 11211))
 SENTRY = os.getenv("SENTRYURL")
 

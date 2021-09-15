@@ -1,10 +1,10 @@
 import subprocess
 from colorama import Fore, Back, Style
 try:  # Runs gunicorn app
-    execution = 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '
+    execution = 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000 '
     print(
         Fore.GREEN + "App is running successfully. Go to https://graphql.itsezsid.com or "
-                     "0.0.0.0:8000 to access the GraphQL endpoint" + Style.RESET_ALL)
+                     "0.0.0.0:8000/graphql to access the GraphQL endpoint" + Style.RESET_ALL)
     subprocess.getstatusoutput(execution)
 
 except KeyboardInterrupt:
@@ -21,6 +21,6 @@ except:  # Except block if cli cant run gunicorn
     print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory "
                                                                          "and run 'gunicorn -w 3 -k "
                                                                          "uvicorn.workers.UvicornWorker "
-                                                                         "graphql-backend:app -b "
+                                                                         "app:app -b "
                                                                          "0.0.0.0:8000'" +
           + Style.RESET_ALL)

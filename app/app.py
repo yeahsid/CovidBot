@@ -5,9 +5,11 @@ from ariadne import gql
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.routing import Mount
+from starlette.staticfiles import StaticFiles
 
 
-# gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000
+# gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000
 # pkill gunicorn
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
@@ -64,8 +66,16 @@ def resolveGlobalStats(*_):
 schema = make_executable_schema(type_defs, query)
 
 middleware = [
-    Middleware(CORSMiddleware, allow_origins=['*'] , allow_methods = ['POST']  )
+    Middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['POST'])
 ]
 # Create an ASGI app using the schema
-app = Starlette(debug=True , middleware = middleware)
-app.mount("/", GraphQL(schema, debug=True , introspection = True))
+
+routes = [
+
+    Mount("/graphql", GraphQL(schema, debug=False)),
+    Mount('/', app=StaticFiles(directory='app/static', html=True), name="static"),
+
+
+]
+#app.mount("/", GraphQL(schema, debug=True , introspection = True))
+app = Starlette(routes=routes)

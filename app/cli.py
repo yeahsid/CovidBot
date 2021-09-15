@@ -1,7 +1,7 @@
 from __future__ import print_function, unicode_literals
 from pyfiglet import Figlet
 from PyInquirer import prompt, print_json
-import backend.functions as functions
+import functions
 from colorama import Fore, Back, Style
 from dotenv import load_dotenv
 import subprocess
@@ -25,7 +25,7 @@ tempath = os.getcwd().split('/')
 
 # Checks if CLI is running in the correct directory
 if tempath[-1] == 'CovidBot':
-    backend = (path + '/backend')
+    app = (path + '/app')
 
 
 # Clears terminal
@@ -54,7 +54,7 @@ def begin_prompt():
         {
             'type': 'confirm',
             'name': 'start',
-            'message': 'Welcome to CovidBot CLI. This app is only for maintaining the backend systems. The chatbot is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
+            'message': 'Welcome to CovidBot CLI. This app is only for maintaining the app systems. The chatbot is powered by IBM Watson. Press Ctrl + C to quit anytime. Do you want to continue? :'
 
         }
 
@@ -93,8 +93,8 @@ def choiceForExec():
                 Fore.RED + 'Could not install dependencies. Install pipenv manually')
     elif answers["choiceForExec"] == 'Run the GraphQL APP':
         try:  # Runs gunicorn app
-            execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-backend:app -b 0.0.0.0:8000 '.format(
-                backend)
+            execution = 'cd  {}  && gunicorn -w 3 -k uvicorn.workers.UvicornWorker graphql-app:app -b 0.0.0.0:8000 '.format(
+                app)
             print(
                 Fore.GREEN + "App is running successfully. Go to https://graphql.itsezsid.com or "
                              "0.0.0.0:8000 to access the GraphQL endpoint" + Style.RESET_ALL)
@@ -102,38 +102,45 @@ def choiceForExec():
 
         except KeyboardInterrupt:
             try:  # Stops gunicorn using pkill [Kills Process]
-                execution = 'cd {} && pkill gunicorn'.format(backend)
+                execution = 'cd {} && pkill gunicorn'.format(app)
                 subprocess.getstatusoutput(execution)
                 print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
 
             except Exception as e:  # Except block
                 capture_exception(e)
                 print(
-                    Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
+                    Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the app directory and run 'pkill gunicorn'" +
                     + Style.RESET_ALL)
 
         except:  # Except block if cli cant run gunicorn
-            print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory "
+            print(Fore.RED + "Unable To Run Gunicorn Directly.\n" + Fore.GREEN + "Please enter the app directory "
                                                                                  "and run 'gunicorn -w 3 -k "
                                                                                  "uvicorn.workers.UvicornWorker "
-                                                                                 "graphql-backend:app -b "
+                                                                                 "graphql-app:app -b "
                                                                                  "0.0.0.0:8000'" +
                   + Style.RESET_ALL)
 
     elif answers["choiceForExec"] == 'Stop the GraphQL app':
         try:  # Stops gunicorn using pkill [Kills Process]
-            execution = 'cd {} && pkill gunicorn'.format(backend)
+            execution = 'cd {} && pkill gunicorn'.format(app)
             subprocess.getstatusoutput(execution)
             print(Fore.GREEN + "Gunicorn Stopped Successfully" + Style.RESET_ALL)
 
         except Exception as e:  # Except block
             capture_exception(e)
             print(
-                Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the backend directory and run 'pkill gunicorn'" +
+                Fore.RED + "Unable To stop Gunicorn Directly.\n" + Fore.GREEN + "Please enter the app directory and run 'pkill gunicorn'" +
                 + Style.RESET_ALL)
     elif answers["choiceForExec"] == 'Update the Database':
         try:  # Runs the update function
             functions.updateDb()
+            print(Fore.GREEN + "Database Updated Successfully" + Style.RESET_ALL)
+        except Exception as e:
+            capture_exception(e)
+            print(Fore.RED + "Database couldnt be updated . Check .env file")
+    elif answers["choiceForExec"] == 'Create SQL Tables in a new Database':
+        try:  # Runs the update function
+            functions.insertDb()
             print(Fore.GREEN + "Database Updated Successfully" + Style.RESET_ALL)
         except Exception as e:
             capture_exception(e)

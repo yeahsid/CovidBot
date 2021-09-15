@@ -19,6 +19,7 @@ uvloop = "*"
 httptools = "*"
 starlette = "*"
 sentry-sdk = "*"
+aiofiles = "*"
 
 [dev-packages]
 
