@@ -73,7 +73,7 @@ middleware = [
 routes = [
 
     Mount("/graphql", GraphQL(schema, debug=False)),
-    Mount('/', app=StaticFiles(directory='app/static', html=True), name="static"),
+    Mount('/', app=StaticFiles(directory='static', html=True), name="static"),
 
 
 ]
