@@ -1,5 +1,11 @@
 import subprocess
 from colorama import Fore, Back, Style
+import functions
+try:
+   print("Inserting Data")
+   functions.insertDb()
+except:
+    print('Cannot insert')
 try:  # Runs gunicorn app
     execution = 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000 '
     print(
