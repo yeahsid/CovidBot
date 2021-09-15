@@ -4,8 +4,8 @@ services:
     image: mysql
     restart: always
     environment:
-      - MYSQL_DATABASE=covidbot
-      - MYSQL_ROOT_PASSWORD=${MYSQLPASSWORD}
+      - MYSQL_DATABASE={MYSQLDATABASE:-covidbot}
+      - MYSQL_ROOT_PASSWORD=${MYSQLPASSWORD:-cmPNTHqENRY3A5ABnQ9BNsTjof6STbKg}
     ports:
       - '3306:3306'
   
@@ -15,12 +15,12 @@ services:
       - '11211:11211'
   covidbot_app:
     environment:
-      - PORT=8000
-      - MYSQLHOST=localhost
-      - MYSQLPORT=3306
-      - MYSQLUSER=mysql
-      - MYSQLPASSWORD=${MYSQLPASSWORD}
-      - MYSQLDATABASE=covidbot
+      - PORT=${PORT:-8000}
+      - MYSQLHOST=${MYSQLHOST:-localhost}
+      - MYSQLPORT=${MYSQLPORT:-3306}
+      - MYSQLUSER=${MYSQLUSER:-mysql}
+      - MYSQLPASSWORD=${MYSQLPASSWORD:-cmPNTHqENRY3A5ABnQ9BNsTjof6STbKg}
+      - MYSQLDATABASE=${MYSQLDATABASE:-covidbot}
     build: 
       context: ./
       dockerfile: Dockerfile

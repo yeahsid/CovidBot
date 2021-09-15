@@ -7,7 +7,7 @@ try:
 except:
     print('Cannot insert')
 try:  # Runs gunicorn app
-    execution = 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:8000 '
+    execution = 'gunicorn -w 3 -k uvicorn.workers.UvicornWorker app:app -b 0.0.0.0:$PORT '
     print(
         Fore.GREEN + "App is running successfully. Go to https://graphql.itsezsid.com or "
                      "0.0.0.0:8000/graphql to access the GraphQL endpoint" + Style.RESET_ALL)
